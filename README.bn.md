@@ -1,6 +1,7 @@
 # Centralized Enterprise Server Services
 
 [![Cisco Packet Tracer](https://img.shields.io/badge/Packet%20Tracer-9.0.1-0D9D8B?style=for-the-badge&logo=cisco&logoColor=white)](https://www.netacad.com/courses/packet-tracer)
+[![CI](https://github.com/fahim3101/centralized-enterprise-server-services/actions/workflows/ci.yml/badge.svg)](https://github.com/fahim3101/centralized-enterprise-server-services/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/status-production--ready-2E7D32?style=for-the-badge)](README.md)
 
