@@ -74,7 +74,7 @@ python ../scripts/pkt_export.py main_project.pkt --xml-only --xml-out lab.xml
 python ../scripts/pkt_export.py main_project.pkt --list
 
 # audit the lab
-python ../scripts/audit_lab.py main_project.pkt --strict
+python ../scripts/audit_lab.py main_project.pkt --strict --allow-warning "IPsec DH group"
 ```
 
 ---

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-pkt_export.py — Extract readable content from a Cisco Packet Tracer ``.pkt`` file.
+pkt_export.py -------- Extract readable content from a Cisco Packet Tracer ``.pkt`` file.
 
 Packet Tracer saves labs in an encrypted container.  This tool decrypts the
 container to its inner XML representation and exports the parts a reviewer
@@ -26,10 +26,13 @@ import argparse
 import csv
 import json
 import os
-import re
 import sys
 import xml.etree.ElementTree as ET
 from typing import Any
+
+# The tools must be able to print on a legacy Windows console (cp1252).
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(errors="replace")
 
 try:
     from pkt_core import decode_bytes
@@ -38,7 +41,7 @@ except ImportError:  # pragma: no cover - guidance for a missing dependency
         "error: the 'pkt-core' package is required to read .pkt files.\n"
         "       install it with:  pip install -r scripts/requirements.txt\n"
     )
-    raise SystemExit(2)
+    raise SystemExit(2) from None
 
 # --------------------------------------------------------------------------- #
 # Constants
@@ -120,6 +123,7 @@ CONFIG_FILE_MAP = {
 # --------------------------------------------------------------------------- #
 # Helpers
 # --------------------------------------------------------------------------- #
+
 
 def _text(node: ET.Element | None, default: str = "") -> str:
     """Return the stripped text of *node* or *default* when it is missing."""
@@ -308,9 +312,7 @@ def link_table(root: ET.Element) -> list[dict[str, str]]:
                 ref_node = candidate
                 break
         if ref_node is not None:
-            ref_to_device[ref_node.text.strip()] = DEVICE_NAME_MAP.get(
-                display_name, display_name
-            )
+            ref_to_device[ref_node.text.strip()] = DEVICE_NAME_MAP.get(display_name, display_name)
 
     rows: list[dict[str, str]] = []
     links = network.find("LINKS")
@@ -365,6 +367,7 @@ def ip_addresses(devices_list: list[dict[str, Any]]) -> list[dict[str, str]]:
 # Output helpers
 # --------------------------------------------------------------------------- #
 
+
 def write_configs(devices_list: list[dict[str, Any]], out_dir: str) -> list[str]:
     """Write one ``.cfg`` file per infrastructure device into *out_dir*."""
     os.makedirs(out_dir, exist_ok=True)
@@ -372,9 +375,7 @@ def write_configs(devices_list: list[dict[str, Any]], out_dir: str) -> list[str]
     for device in devices_list:
         if device["type"] not in INFRA_TYPES:
             continue
-        filename = CONFIG_FILE_MAP.get(
-            device["display_name"], f"{device['name']}.cfg"
-        )
+        filename = CONFIG_FILE_MAP.get(device["display_name"], f"{device['name']}.cfg")
         path = os.path.join(out_dir, filename)
         with open(path, "w", encoding="utf-8", newline="\n") as handle:
             handle.write(device["running_config"].rstrip() + "\n")
@@ -395,9 +396,11 @@ def write_csv(rows: list[dict[str, str]], path: str, fieldnames: list[str]) -> N
 # CLI
 # --------------------------------------------------------------------------- #
 
+
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__,
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("pkt", help="path to the .pkt lab file")
     parser.add_argument("--list", action="store_true", help="print the device inventory")
     parser.add_argument("--xml-only", action="store_true", help="only dump the decrypted XML")
@@ -477,7 +480,9 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"      A {record['name']:<26} -> {record['ip']}  (TTL {record['ttl']})")
             email = service.get("email", {})
             print(f"  SMTP domain   : {email.get('SMTP_DOMAIN', '')}")
-            print(f"  SMTP / POP3   : {email.get('SMTP_ENABLED', '0')} / {email.get('POP3_ENABLED', '0')}")
+            print(
+                f"  SMTP / POP3   : {email.get('SMTP_ENABLED', '0')} / {email.get('POP3_ENABLED', '0')}"
+            )
             for user in email.get("users", []):
                 print(f"      mailbox {user['username']} / {user['password']}")
 

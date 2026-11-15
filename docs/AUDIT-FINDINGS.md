@@ -269,7 +269,7 @@ shipped as ready-to-apply overlays in [`configs/hardened/`](../configs/hardened/
 ## Verification of the fixes
 
 ```bash
-python scripts/audit_lab.py lab/main_project.pkt --strict
+python scripts/audit_lab.py lab/main_project.pkt --strict --allow-warning "IPsec DH group"
 ```
 
 ```

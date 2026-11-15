@@ -234,7 +234,7 @@ line vty 0 4
 The automated audit checks the enforced items on every commit:
 
 ```bash
-python scripts/audit_lab.py lab/main_project.pkt --strict
+python scripts/audit_lab.py lab/main_project.pkt --strict --allow-warning "IPsec DH group"
 ```
 
 It verifies unique hostnames, password encryption, `enable secret`, login

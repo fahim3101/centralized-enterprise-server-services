@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-check_ipam.py — Validate the IP addressing plan of the lab.
+check_ipam.py - Validate the IP addressing plan of the lab.
 
 Cross-checks the addresses that are actually configured on the devices against
 ``docs/IPAM.md`` and against each other:
@@ -28,6 +28,10 @@ import re
 import sys
 import xml.etree.ElementTree as ET
 
+# The tools must be able to print on a legacy Windows console (cp1252).
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(errors="replace")
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from pkt_export import devices, server_services  # noqa: E402
@@ -41,9 +45,7 @@ def parse_networks(ipam_path: str) -> list[tuple[ipaddress.IPv4Network, str]]:
     found: list[tuple[ipaddress.IPv4Network, str]] = []
     for match in re.finditer(r"\b(\d{1,3}(?:\.\d{1,3}){3})/(\d{1,2})\b", text):
         try:
-            network = ipaddress.ip_network(
-                f"{match.group(1)}/{match.group(2)}", strict=False
-            )
+            network = ipaddress.ip_network(f"{match.group(1)}/{match.group(2)}", strict=False)
         except ValueError:
             continue
         found.append((network, match.group(0)))
@@ -51,8 +53,9 @@ def parse_networks(ipam_path: str) -> list[tuple[ipaddress.IPv4Network, str]]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__,
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("pkt", help="path to the .pkt lab file")
     parser.add_argument("--ipam", default="docs/IPAM.md", help="IPAM document to validate against")
     parser.add_argument("--json", help="write the extracted plan as JSON")
@@ -89,19 +92,25 @@ def main(argv: list[str] | None = None) -> int:
                 if len(parts) >= 4 and parts[0] == "ip":
                     address, mask = parts[2], parts[3]
                     interfaces.append(
-                        {"device": device["name"], "interface": current,
-                         "address": address, "mask": mask}
+                        {
+                            "device": device["name"],
+                            "interface": current,
+                            "address": address,
+                            "mask": mask,
+                        }
                     )
                     owners.setdefault(address, []).append(f"{device['name']} ({current})")
             elif "standby" in line and " ip " in line and current:
                 address = line.split(" ip ")[1].strip()
                 interfaces.append(
-                    {"device": device["name"], "interface": current,
-                     "address": address, "mask": "hsrp"}
+                    {
+                        "device": device["name"],
+                        "interface": current,
+                        "address": address,
+                        "mask": "hsrp",
+                    }
                 )
-                standby_owners.setdefault(address, []).append(
-                    f"{device['name']} ({current})"
-                )
+                standby_owners.setdefault(address, []).append(f"{device['name']} ({current})")
 
     problems: list[str] = []
 
@@ -127,9 +136,7 @@ def main(argv: list[str] | None = None) -> int:
             if entry["mask"] == "hsrp":
                 continue
             try:
-                network = ipaddress.ip_network(
-                    f"{entry['address']}/{entry['mask']}", strict=False
-                )
+                network = ipaddress.ip_network(f"{entry['address']}/{entry['mask']}", strict=False)
             except ValueError:
                 problems.append(f"{entry['device']}: invalid address {entry['address']}")
                 continue
@@ -146,9 +153,7 @@ def main(argv: list[str] | None = None) -> int:
     dhcp_rows: list[dict[str, str]] = []
     if core is not None:
         text = core.get("running_config", "")
-        blocks = re.findall(
-            r"^ip dhcp pool (\S+)\n((?:[ \t]+.*\n)*)", text, re.MULTILINE
-        )
+        blocks = re.findall(r"^ip dhcp pool (\S+)\n((?:[ \t]+.*\n)*)", text, re.MULTILINE)
         svi_addresses = {
             entry["address"]
             for entry in interfaces
@@ -205,9 +210,7 @@ def main(argv: list[str] | None = None) -> int:
                     <= ip
                     <= ipaddress.ip_address(row["range_end"])
                 ):
-                    problems.append(
-                        f"DHCP pool {pool} range covers the reserved address {address}"
-                    )
+                    problems.append(f"DHCP pool {pool} range covers the reserved address {address}")
 
     # ------------------------------------------------------------------ #
     # 5. DNS service matches the DHCP advertisement
@@ -216,9 +219,7 @@ def main(argv: list[str] | None = None) -> int:
     if len(dns_servers) == 1 and dhcp_rows:
         advertised = {row["dns_server"] for row in dhcp_rows}
         if advertised != {"172.10.10.2"}:
-            problems.append(
-                f"DHCP advertises {advertised} but the DNS service runs elsewhere"
-            )
+            problems.append(f"DHCP advertises {advertised} but the DNS service runs elsewhere")
 
     # ------------------------------------------------------------------ #
     # output

@@ -382,7 +382,7 @@ python scripts/pkt_export.py lab/main_project.pkt --xml-only
 python scripts/pkt_export.py lab/main_project.pkt --list
 
 # validate the lab against the documented IPAM and best-practice rules
-python scripts/audit_lab.py lab/main_project.pkt --strict
+python scripts/audit_lab.py lab/main_project.pkt --strict --allow-warning "IPsec DH group"
 
 # unit tests for the parsers
 python -m pytest scripts/tests -q

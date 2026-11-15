@@ -42,7 +42,11 @@ jobs:
           PY
 
       - name: Run the lab audit
-        run: python scripts/audit_lab.py lab/main_project.pkt --json audit-report.json
+        run: |
+          python scripts/audit_lab.py lab/main_project.pkt \
+            --strict \
+            --allow-warning "IPsec DH group" \
+            --json audit-report.json
 
       - name: Validate the IP addressing plan
         run: python scripts/check_ipam.py lab/main_project.pkt --ipam docs/IPAM.md
@@ -119,10 +123,10 @@ jobs:
         run: pip install ruff
 
       - name: Check the scripts
-        run: ruff check scripts --select E,F,W,I --line-length 120
+        run: ruff check scripts
 
       - name: Check the formatting
-        run: ruff format --check scripts --line-length 120
+        run: ruff format --check scripts
 
   docs:
     name: Documentation links

@@ -35,6 +35,7 @@ ORIGINAL = os.path.join(REPO, "lab", "main_project-original.pkt")
 # Fixtures
 # --------------------------------------------------------------------------- #
 
+
 @pytest.fixture(scope="module")
 def root():
     with open(LAB, "rb") as handle:
@@ -61,6 +62,7 @@ def services(root):
 # Container
 # --------------------------------------------------------------------------- #
 
+
 def test_lab_file_exists():
     assert os.path.isfile(LAB), "lab/main_project.pkt is missing"
 
@@ -83,6 +85,7 @@ def test_original_and_patched_are_different():
 # --------------------------------------------------------------------------- #
 # Inventory
 # --------------------------------------------------------------------------- #
+
 
 def test_device_count(device_list):
     assert len(device_list) == 42, f"expected 42 devices, found {len(device_list)}"
@@ -111,9 +114,7 @@ def test_hostnames_are_unique(device_list):
 
 def test_no_generic_hostnames_remain(device_list):
     generic = {
-        d["name"]
-        for d in device_list
-        if d["hostname"] in ("Switch", "Router", "Server", "PC")
+        d["name"] for d in device_list if d["hostname"] in ("Switch", "Router", "Server", "PC")
     }
     assert not generic, f"generic hostnames still in use: {generic}"
 
@@ -123,14 +124,13 @@ def test_running_config_is_not_duplicated(device_list):
         config = device["running_config"]
         if not config:
             continue
-        assert config.count("hostname ") == 1, (
-            f"{device['name']} has a duplicated running-config"
-        )
+        assert config.count("hostname ") == 1, f"{device['name']} has a duplicated running-config"
 
 
 # --------------------------------------------------------------------------- #
 # Naming
 # --------------------------------------------------------------------------- #
+
 
 def test_branch_workstations_are_renamed(device_list):
     names = {d["name"] for d in device_list}
@@ -141,11 +141,21 @@ def test_branch_workstations_are_renamed(device_list):
 def test_new_device_names_exist(device_list):
     names = {d["name"] for d in device_list}
     for expected in (
-        "core-01", "core-02", "leaf-01", "leaf-02",
-        "access-sales-01", "access-hr-01", "access-accounts-01",
-        "HQ-WAN-RTR", "EDGE-RTR", "ISP",
-        "BR1-WAN-RTR", "BR4-ACCESS",
-        "SALES-PC1", "HR-PC1", "BR4-PC2",
+        "core-01",
+        "core-02",
+        "leaf-01",
+        "leaf-02",
+        "access-sales-01",
+        "access-hr-01",
+        "access-accounts-01",
+        "HQ-WAN-RTR",
+        "EDGE-RTR",
+        "ISP",
+        "BR1-WAN-RTR",
+        "BR4-ACCESS",
+        "SALES-PC1",
+        "HR-PC1",
+        "BR4-PC2",
     ):
         assert expected in names, f"device {expected} is missing"
 
@@ -170,14 +180,13 @@ def test_config_file_map_has_no_duplicate_targets():
         owners = [k for k, v in CONFIG_FILE_MAP.items() if v == target]
         assert len(owners) == 2, f"{target} is claimed by {owners}"
         old, new = owners
-        assert DEVICE_NAME_MAP.get(old, old) == new, (
-            f"{old} and {new} are not the same device"
-        )
+        assert DEVICE_NAME_MAP.get(old, old) == new, f"{old} and {new} are not the same device"
 
 
 # --------------------------------------------------------------------------- #
 # Cabling
 # --------------------------------------------------------------------------- #
+
 
 def test_cable_count(root):
     links = link_table(root)
@@ -195,6 +204,7 @@ def test_every_cable_has_both_ends(root):
 # --------------------------------------------------------------------------- #
 # Services
 # --------------------------------------------------------------------------- #
+
 
 def test_exactly_one_dns_server(services):
     dns = [s for s in services.values() if s["dns_enabled"]]
@@ -244,20 +254,14 @@ def test_web_server_serves_the_company_portal(root):
 
 
 def test_mail_server_has_the_company_domain(services):
-    mail = [
-        s for s in services.values()
-        if s["email"].get("SMTP_DOMAIN")
-    ]
+    mail = [s for s in services.values() if s["email"].get("SMTP_DOMAIN")]
     assert len(mail) == 1
     assert mail[0]["email"]["SMTP_DOMAIN"] == "company.com"
     assert mail[0]["email"]["POP3_ENABLED"] == "1"
 
 
 def test_mail_server_has_the_expected_mailboxes(services):
-    mail = [
-        s for s in services.values()
-        if s["email"].get("SMTP_DOMAIN")
-    ][0]
+    mail = [s for s in services.values() if s["email"].get("SMTP_DOMAIN")][0]
     users = {u["username"] for u in mail["email"]["users"]}
     assert {"sales", "hr"} <= users
 
@@ -279,6 +283,7 @@ def test_client_mail_identities_use_the_company_domain(root):
 # --------------------------------------------------------------------------- #
 # Configuration
 # --------------------------------------------------------------------------- #
+
 
 def test_dhcp_pools_have_explicit_ranges(device_list):
     core = next(d for d in device_list if d["name"] == "core-01")
@@ -304,10 +309,9 @@ def test_dhcp_excludes_the_svi_and_hsrp_addresses(device_list):
     core = next(d for d in device_list if d["name"] == "core-01")
     config = core["running_config"]
     for third in range(10, 17):
-        assert (
-            f"ip dhcp excluded-address 192.168.{third}.252 192.168.{third}.254"
-            in config
-        ), f"VLAN {third} does not exclude the SVI and HSRP addresses"
+        assert f"ip dhcp excluded-address 192.168.{third}.252 192.168.{third}.254" in config, (
+            f"VLAN {third} does not exclude the SVI and HSRP addresses"
+        )
 
 
 def test_core_02_can_relay_dhcp(device_list):
@@ -324,7 +328,8 @@ def test_both_cores_restrict_the_trunks(device_list):
 def test_access_ports_are_hardened(device_list):
     """Every switch that terminates a workstation must harden its edge ports."""
     switches = [
-        d for d in device_list
+        d
+        for d in device_list
         if d["type"] == "MultiLayerSwitch"
         and (d["name"].startswith("access-") or d["name"].endswith("-ACCESS"))
     ]
@@ -332,9 +337,7 @@ def test_access_ports_are_hardened(device_list):
     for device in switches:
         config = device["running_config"]
         assert "spanning-tree portfast" in config, f"{device['name']} lacks portfast"
-        assert "spanning-tree bpduguard enable" in config, (
-            f"{device['name']} lacks bpduguard"
-        )
+        assert "spanning-tree bpduguard enable" in config, f"{device['name']} lacks bpduguard"
         assert "switchport port-security maximum 1" in config
         assert "switchport port-security violation shutdown" in config
 

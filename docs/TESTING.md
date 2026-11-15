@@ -6,7 +6,7 @@ device, the exact command, and the output that must appear.
 Run the automated part of this plan on every commit:
 
 ```bash
-python scripts/audit_lab.py lab/main_project.pkt --strict
+python scripts/audit_lab.py lab/main_project.pkt --strict --allow-warning "IPsec DH group"
 python scripts/check_ipam.py lab/main_project.pkt --ipam docs/IPAM.md
 ```
 

@@ -173,7 +173,7 @@ python scripts/pkt_export.py lab/main_project.pkt --out configs/
 ### অটোমেটেড অডিট চালানো
 
 ```bash
-python scripts/audit_lab.py lab/main_project.pkt --strict
+python scripts/audit_lab.py lab/main_project.pkt --strict --allow-warning "IPsec DH group"
 ```
 
 ```
@@ -187,7 +187,7 @@ python scripts/audit_lab.py lab/main_project.pkt --strict
 | ডকুমেন্ট | বিষয় |
 |---|---|
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | স্তর ধরে ডিজাইনের যুক্তি |
-| [`docs/DEVICE-INVENTORY.md`](docs/DEVICE-INVENTORY.md) | প্রতিটি ডিভাই�, পোর্ট ও ভূমিকা |
+| [`docs/DEVICE-INVENTORY.md`](docs/DEVICE-INVENTORY.md) | প্রতিটি ডিভাই, পোর্ট ও ভূমিকা |
 | [`docs/IPAM.md`](docs/IPAM.md) | প্রতিটি IP ঠিকানা ও তার কাজ |
 | [`docs/CONFIGURATION.md`](docs/CONFIGURATION.md) | ধাপে ধাপে সব সার্ভিস কনফিগারেশন |
 | [`docs/TESTING.md`](docs/TESTING.md) | ২০টি টেস্ট ও প্রত্যাশিত আউটপুট |

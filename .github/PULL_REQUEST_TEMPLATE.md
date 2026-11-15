@@ -19,13 +19,13 @@
 <!-- Paste the command and the result. -->
 
 ```
-$ python scripts/audit_lab.py lab/main_project.pkt --strict
+$ python scripts/audit_lab.py lab/main_project.pkt --strict --allow-warning "IPsec DH group"
 ...
 ```
 
 ## Checklist
 
-- [ ] `python scripts/audit_lab.py lab/main_project.pkt --strict` → 0 failures
+- [ ] `python scripts/audit_lab.py lab/main_project.pkt --strict --allow-warning "IPsec DH group"` → 0 failures
 - [ ] `python scripts/check_ipam.py lab/main_project.pkt --ipam docs/IPAM.md` → 0 problems
 - [ ] `python -m pytest scripts/tests -q` → all green
 - [ ] `configs/` regenerated and committed

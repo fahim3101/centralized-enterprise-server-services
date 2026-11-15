@@ -1,0 +1,25 @@
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+extend-exclude = [".venv", "lab"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = [
+    "E501",   # line length is handled by the formatter
+    "UP007",  # keep Optional/Union syntax compatible with older tooling
+    "B008",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/tests/*" = ["E402"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+
+[tool.pytest.ini_options]
+testpaths = ["scripts/tests"]
+python_files = ["test_*.py"]
+addopts = "-q"

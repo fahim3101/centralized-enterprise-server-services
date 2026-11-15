@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-audit_lab.py — Automated health check for the Centralized Enterprise Server Services lab.
+audit_lab.py -------- Automated health check for the Centralized Enterprise Server Services lab.
 
 Decrypts a Packet Tracer ``.pkt`` file and validates it against the design
 rules documented in ``docs/ARCHITECTURE.md``.  Every check returns one of:
@@ -29,13 +29,15 @@ import re
 import sys
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any
+
+# The tools must be able to print on a legacy Windows console (cp1252).
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(errors="replace")
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from pkt_export import (  # noqa: E402
-    CONFIG_FILE_MAP,
-    DEVICE_NAME_MAP,
     INFRA_TYPES,
     client_emails,
     devices,
@@ -45,14 +47,59 @@ from pkt_export import (  # noqa: E402
 
 PASS, WARN, FAIL = "PASS", "WARN", "FAIL"
 
+#: Every rule the audit can report, so that "--allow-warning list" is
+#: discoverable without reading the source.
+RULE_NAMES = (
+    "device inventory",
+    "cabling",
+    "unique hostnames",
+    "hostnames set",
+    "password encryption",
+    "enable secret",
+    "login banner",
+    "DHCP pools",
+    "DHCP ranges",
+    "DHCP -> DNS integration",
+    "DHCP exclusions",
+    "single authoritative DNS",
+    "DNS zone content",
+    "DNS record names",
+    "www record target",
+    "mail record target",
+    "single mail domain",
+    "mail domain",
+    "POP3 enabled",
+    "mailbox 'sales'",
+    "mailbox 'hr'",
+    "client mail identity",
+    "FTP disabled",
+    "TFTP disabled",
+    "web service",
+    "edge port protection",
+    "trunk VLAN scope",
+    "unique interface addresses",
+    "HSRP standby pairs",
+    "OSPF coverage",
+    "default route origination",
+    "PAT configuration",
+    "NAT interface roles",
+    "IPsec coverage",
+    "IPsec DH group",
+)
+
 
 @dataclass
 class Report:
     """Collects the results of every audit rule."""
 
     rows: list[tuple[str, str, str]] = field(default_factory=list)
+    #: Rules whose warnings have been reviewed and accepted on purpose.
+    allowed: set[str] = field(default_factory=set)
 
     def add(self, status: str, rule: str, detail: str) -> None:
+        if status == WARN and rule in self.allowed:
+            status = PASS
+            detail = f"{detail} (accepted by policy)"
         self.rows.append((status, rule, detail))
 
     def check(self, ok: bool, rule: str, ok_msg: str, bad_msg: str) -> None:
@@ -77,7 +124,7 @@ class Report:
             lines.append(f"{icons[status]} {rule.ljust(width)}  {detail}")
         lines.append("")
         lines.append(
-            f"{len(self.rows)} checks — "
+            f"{len(self.rows)} checks - "
             f"{len(self.rows) - self.failures - self.warnings} passed, "
             f"{self.warnings} warnings, {self.failures} failures"
         )
@@ -87,6 +134,7 @@ class Report:
 # --------------------------------------------------------------------------- #
 # Rule helpers
 # --------------------------------------------------------------------------- #
+
 
 def config_of(device: dict[str, Any]) -> str:
     return device.get("running_config", "")
@@ -181,7 +229,11 @@ def audit(root: ET.Element) -> Report:
             text,
             re.MULTILINE,
         )
-        missing_range = [name for name, body in without_range if not re.search(r"^[ \t]+range ", body, re.MULTILINE)]
+        missing_range = [
+            name
+            for name, body in without_range
+            if not re.search(r"^[ \t]+range ", body, re.MULTILINE)
+        ]
         report.check(
             not missing_range,
             "DHCP ranges",
@@ -216,7 +268,7 @@ def audit(root: ET.Element) -> Report:
                 continue
 
         pooled_subnets: list[str] = []
-        for name, body in re.findall(
+        for _name, body in re.findall(
             r"^ip dhcp pool (\S+)\n((?:[ \t]+.*\n)*)", text, re.MULTILINE
         ):
             network_line = re.search(r"^[ \t]+network (\S+) ", body, re.MULTILINE)
@@ -235,12 +287,8 @@ def audit(root: ET.Element) -> Report:
             text,
             re.MULTILINE,
         )
-        hsrp_addresses = re.findall(
-            r"^[ \t]+standby \d+ ip (\S+)", text, re.MULTILINE
-        )
-        pooled_prefixes = {
-            ".".join(network.split(".")[:3]) for network in pooled_subnets
-        }
+        hsrp_addresses = re.findall(r"^[ \t]+standby \d+ ip (\S+)", text, re.MULTILINE)
+        pooled_prefixes = {".".join(network.split(".")[:3]) for network in pooled_subnets}
         relevant = [
             a
             for a in svi_addresses + hsrp_addresses
@@ -250,7 +298,7 @@ def audit(root: ET.Element) -> Report:
         report.check(
             not uncovered,
             "DHCP exclusions",
-            f"every SVI/HSRP address in a pooled subnet is excluded from DHCP",
+            "every SVI/HSRP address in a pooled subnet is excluded from DHCP",
             f"address(es) not excluded from DHCP: {', '.join(sorted(set(uncovered)))}",
         )
 
@@ -259,7 +307,9 @@ def audit(root: ET.Element) -> Report:
     report.check(
         len(dns_servers) == 1,
         "single authoritative DNS",
-        f"exactly one DNS service enabled ({dns_servers[0]['name']})" if dns_servers else "no DNS service enabled",
+        f"exactly one DNS service enabled ({dns_servers[0]['name']})"
+        if dns_servers
+        else "no DNS service enabled",
         f"{len(dns_servers)} DNS services enabled - split-brain DNS: "
         + ", ".join(s["name"] for s in dns_servers),
     )
@@ -304,13 +354,17 @@ def audit(root: ET.Element) -> Report:
     mail_servers = [
         s
         for s in services.values()
-        if s.get("email", {}).get("SMTP_ENABLED") == "1"
-        and s.get("email", {}).get("SMTP_DOMAIN")
+        if s.get("email", {}).get("SMTP_ENABLED") == "1" and s.get("email", {}).get("SMTP_DOMAIN")
     ]
+    mail_summary = (
+        f"exactly one mail server with a domain ({mail_servers[0]['name']})"
+        if mail_servers
+        else "no mail server with an SMTP domain"
+    )
     report.check(
         len(mail_servers) == 1,
         "single mail domain",
-        f"exactly one mail server with a domain ({mail_servers[0]['name']})" if mail_servers else "no mail server with an SMTP domain",
+        mail_summary,
         f"{len(mail_servers)} mail servers define an SMTP domain",
     )
     if mail_servers:
@@ -420,10 +474,10 @@ def audit(root: ET.Element) -> Report:
         text = config_of(device)
         for match in re.finditer(r"^[ \t]+ip address (\S+) (\S+)", text, re.MULTILINE):
             addresses.append(match.group(1))
-        for match in re.finditer(
-            r"^[ \t]+standby (\d+) ip (\S+)", text, re.MULTILINE
-        ):
-            standby.setdefault(match.group(2), []).append(f"{device['name']} (group {match.group(1)})")
+        for match in re.finditer(r"^[ \t]+standby (\d+) ip (\S+)", text, re.MULTILINE):
+            standby.setdefault(match.group(2), []).append(
+                f"{device['name']} (group {match.group(1)})"
+            )
 
     dupes = sorted({a for a in addresses if addresses.count(a) > 1})
     report.check(
@@ -454,7 +508,9 @@ def audit(root: ET.Element) -> Report:
         f"OSPF is configured on {len(ospf_devices)} devices",
         f"OSPF is only configured on {len(ospf_devices)} devices",
     )
-    originators = [d["name"] for d in infra if has(config_of(d), r"^ default-information originate")]
+    originators = [
+        d["name"] for d in infra if has(config_of(d), r"^ default-information originate")
+    ]
     report.check(
         bool(originators),
         "default route origination",
@@ -465,7 +521,8 @@ def audit(root: ET.Element) -> Report:
     # -- NAT / PAT ------------------------------------------------------------ #
     edge = next((d for d in infra if d["name"] == "EDGE-RTR"), None)
     report.check(
-        edge is not None and has(config_of(edge), r"^ip nat inside source list \d+ interface .* overload"),
+        edge is not None
+        and has(config_of(edge), r"^ip nat inside source list \d+ interface .* overload"),
         "PAT configuration",
         "EDGE-RTR performs PAT with overloading",
         "EDGE-RTR is missing 'ip nat inside source list ... overload'",
@@ -503,13 +560,29 @@ def audit(root: ET.Element) -> Report:
 # CLI
 # --------------------------------------------------------------------------- #
 
+
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__,
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("pkt", help="path to the .pkt lab file")
     parser.add_argument("--strict", action="store_true", help="treat warnings as failures")
+    parser.add_argument(
+        "--allow-warning",
+        action="append",
+        default=[],
+        metavar="RULE",
+        help=(
+            "accept a warning for this rule (repeatable). "
+            "Use 'list' to print the available rule names."
+        ),
+    )
     parser.add_argument("--json", help="write the report as JSON to this path")
     args = parser.parse_args(argv)
+
+    if "list" in args.allow_warning:
+        print("\n".join(sorted(RULE_NAMES)))
+        return 0
 
     if not os.path.isfile(args.pkt):
         sys.stderr.write(f"error: no such file: {args.pkt}\n")
@@ -518,7 +591,9 @@ def main(argv: list[str] | None = None) -> int:
     try:
         from pkt_core import decode_bytes
     except ImportError:
-        sys.stderr.write("error: install the dependencies with: pip install -r scripts/requirements.txt\n")
+        sys.stderr.write(
+            "error: install the dependencies with: pip install -r scripts/requirements.txt\n"
+        )
         return 2
 
     with open(args.pkt, "rb") as handle:
@@ -526,6 +601,11 @@ def main(argv: list[str] | None = None) -> int:
     root = ET.fromstring(decode_bytes(raw).xml)
 
     report = audit(root)
+    report.allowed.update(args.allow_warning)
+    report.rows = [
+        (PASS if status == WARN and rule in report.allowed else status, rule, detail)
+        for status, rule, detail in report.rows
+    ]
     print(report.render())
 
     if args.json:

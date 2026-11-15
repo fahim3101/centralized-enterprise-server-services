@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-apply_fixes.py — Apply the production-hardening fixes to the Packet Tracer lab.
+apply_fixes.py -------- Apply the production-hardening fixes to the Packet Tracer lab.
 
 The lab file is decrypted to its plaintext XML, every defect listed in
 ``docs/AUDIT-FINDINGS.md`` is corrected in place, and the result is re-encrypted
@@ -17,12 +17,15 @@ Usage
 from __future__ import annotations
 
 import argparse
-import copy
 import os
 import re
 import sys
 import xml.etree.ElementTree as ET
-from typing import Callable
+from collections.abc import Callable
+
+# The tools must be able to print on a legacy Windows console (cp1252).
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(errors="replace")
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -152,24 +155,17 @@ DESCRIPTIONS = {
     ("BR2-WAN-RTR", "Serial1/0"): "IPsec tunnel to HQ-WAN-RTR (6.1.1.0/24)",
     ("BR3-WAN-RTR", "FastEthernet0/0"): "uplink to BR3-ACCESS (3.1.1.0/24)",
     ("BR3-WAN-RTR", "Serial1/0"): "IPsec tunnel to HQ-WAN-RTR (7.1.1.0/24)",
-    "BR4-WAN-RTR": None,
-    "BR4-WAN-RTR": "BR4-WAN-RTR",
+    ("BR4-WAN-RTR", "FastEthernet0/0"): "uplink to BR4-ACCESS (4.1.1.0/24)",
+    ("BR4-WAN-RTR", "Serial1/0"): "IPsec tunnel to HQ-WAN-RTR (8.1.1.0/24)",
+    ("BR1-ACCESS", "GigabitEthernet0/1"): "uplink to BR1-WAN-RTR (1.1.1.0/24)",
+    ("BR2-ACCESS", "GigabitEthernet0/1"): "uplink to BR2-WAN-RTR (2.1.1.0/24)",
+    ("BR3-ACCESS", "GigabitEthernet0/1"): "uplink to BR3-WAN-RTR (3.1.1.0/24)",
+    ("BR4-ACCESS", "GigabitEthernet0/1"): "uplink to BR4-WAN-RTR (4.1.1.0/24)",
 }
-DESCRIPTIONS.update(
-    {
-        ("BR4-WAN-RTR", "FastEthernet0/0"): "uplink to BR4-ACCESS (4.1.1.0/24)",
-        ("BR4-WAN-RTR", "Serial1/0"): "IPsec tunnel to HQ-WAN-RTR (8.1.1.0/24)",
-        ("BR1-ACCESS", "GigabitEthernet0/1"): "uplink to BR1-WAN-RTR (1.1.1.0/24)",
-        ("BR2-ACCESS", "GigabitEthernet0/1"): "uplink to BR2-WAN-RTR (2.1.1.0/24)",
-        ("BR3-ACCESS", "GigabitEthernet0/1"): "uplink to BR3-WAN-RTR (3.1.1.0/24)",
-        ("BR4-ACCESS", "GigabitEthernet0/1"): "uplink to BR4-WAN-RTR (4.1.1.0/24)",
-    }
-)
 
 #: Host -> logical description of the site it belongs to
 BANNER_TEMPLATE = (
-    "AUTHORIZED ACCESS ONLY - Centralized Enterprise Server Services | "
-    "{device} | {role}"
+    "AUTHORIZED ACCESS ONLY - Centralized Enterprise Server Services | {device} | {role}"
 )
 
 #: The corporate intranet page served by Server0.  It is read from
@@ -189,16 +185,13 @@ def intranet_html() -> str:
         page = handle.read()
     # Packet Tracer stores the page body as XML text, so the markup has to be
     # escaped.  The resulting text is what the web browser renders.
-    return (
-        page.replace("&", "&amp;")
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
-    )
+    return page.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
 # --------------------------------------------------------------------------- #
 # Low level helpers
 # --------------------------------------------------------------------------- #
+
 
 def text_of(node: ET.Element | None, default: str = "") -> str:
     if node is None or node.text is None:
@@ -281,6 +274,7 @@ def block_contains(block: list[str], needle: str) -> bool:
 # Per-device configuration fixes
 # --------------------------------------------------------------------------- #
 
+
 def harden_device(device: str, lines: list[str]) -> list[str]:
     """Apply the generic and device specific configuration fixes."""
     lines = list(lines)
@@ -296,7 +290,7 @@ def harden_device(device: str, lines: list[str]) -> list[str]:
         if line.startswith("hostname "):
             lines[index] = f"hostname {HOSTNAME.get(device, device)}"
             break
-    if device in ROLE and not any(l.startswith("banner motd") for l in lines):
+    if device in ROLE and not any(line.startswith("banner motd") for line in lines):
         insert_after(
             lines,
             r"^hostname ",
@@ -407,11 +401,11 @@ def fix_core_dhcp(lines: list[str]) -> list[str]:
     ordered = [p for name in order for p in pools if p[0] == name]
     ordered += [p for p in pools if p[0] not in order]
 
-    for name, block in ordered:
+    for _name, block in ordered:
         rebuilt.append(block[0])
-        if not any(re.match(r"^[ \t]+range ", l) for l in block):
+        if not any(re.match(r"^[ \t]+range ", line) for line in block):
             network_line = next(
-                (l for l in block if re.match(r"^[ \t]+network ", l)), None
+                (line for line in block if re.match(r"^[ \t]+network ", line)), None
             )
             if network_line:
                 subnet = network_line.split()[1]
@@ -421,6 +415,7 @@ def fix_core_dhcp(lines: list[str]) -> list[str]:
         rebuilt.append("!")
 
     return head + rebuilt + tail
+
 
 def fix_core_02_relay(lines: list[str]) -> list[str]:
     """Give core-02 a DHCP relay path so it can serve clients when active."""
@@ -438,6 +433,7 @@ def fix_core_02_relay(lines: list[str]) -> list[str]:
 # --------------------------------------------------------------------------- #
 # Server side fixes
 # --------------------------------------------------------------------------- #
+
 
 def fix_servers(root: ET.Element) -> list[str]:
     """Apply the server service fixes and return a log of what changed."""
@@ -545,6 +541,7 @@ def fix_clients(root: ET.Element) -> list[str]:
 # Driver
 # --------------------------------------------------------------------------- #
 
+
 def apply_fixes(root: ET.Element, verbose: bool = True) -> list[str]:
     """Apply every fix to the decrypted lab and return a change log."""
     log: list[str] = []
@@ -583,8 +580,9 @@ def apply_fixes(root: ET.Element, verbose: bool = True) -> list[str]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__,
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("pkt", help="source .pkt file")
     parser.add_argument("--out", help="destination .pkt file")
     parser.add_argument("--dry-run", action="store_true", help="report the changes without writing")
