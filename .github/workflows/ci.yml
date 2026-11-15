@@ -1,0 +1,162 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: Audit the lab
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: scripts/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Verify the lab file is a valid Packet Tracer container
+        run: |
+          python - <<'PY'
+          from pkt_core import decode_bytes
+          with open("lab/main_project.pkt", "rb") as handle:
+              raw = handle.read()
+          container = decode_bytes(raw)
+          assert container.xml.startswith(b"<PACKETTRACER5>"), "unexpected XML root"
+          print(f"lab/main_project.pkt decoded: {len(container.xml):,} bytes of XML")
+          PY
+
+      - name: Run the lab audit
+        run: python scripts/audit_lab.py lab/main_project.pkt --json audit-report.json
+
+      - name: Validate the IP addressing plan
+        run: python scripts/check_ipam.py lab/main_project.pkt --ipam docs/IPAM.md
+
+      - name: Export the device configurations
+        run: |
+          mkdir -p /tmp/export
+          python scripts/pkt_export.py lab/main_project.pkt --out /tmp/export
+          ls -1 /tmp/export | wc -l
+
+      - name: Check that configs/ is up to date
+        run: |
+          python - <<'PY'
+          import filecmp
+          import os
+          import sys
+
+          repo = "configs"
+          fresh = "/tmp/export"
+          stale = []
+          for name in sorted(os.listdir(fresh)):
+              current = os.path.join(repo, name)
+              if not os.path.exists(current):
+                  stale.append(f"{name} is missing from configs/")
+                  continue
+              if not filecmp.cmp(os.path.join(fresh, name), current, shallow=False):
+                  stale.append(f"{name} differs from the lab")
+          if stale:
+              print("The exported configurations are out of date:")
+              for item in stale:
+                  print("  " + item)
+              print("\nRun: python scripts/pkt_export.py lab/main_project.pkt --out configs/")
+              sys.exit(1)
+          print("configs/ matches the lab")
+          PY
+
+      - name: Upload the audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-report
+          path: audit-report.json
+          if-no-files-found: ignore
+
+  tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: scripts/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Run the test suite
+        run: python -m pytest scripts/tests -q
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Check the scripts
+        run: ruff check scripts --select E,F,W,I --line-length 120
+
+      - name: Check the formatting
+        run: ruff format --check scripts --line-length 120
+
+  docs:
+    name: Documentation links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check that every internal link resolves
+        run: |
+          python - <<'PY'
+          import os
+          import re
+          import sys
+
+          broken = []
+          pattern = re.compile(r"\[[^\]]*\]\(([^)#]+)(?:#[^)]*)?\)")
+          for root, dirs, files in os.walk("."):
+              dirs[:] = [d for d in dirs if d not in {".git", "__pycache__", ".pytest_cache"}]
+              for name in files:
+                  if not name.endswith(".md"):
+                      continue
+                  path = os.path.join(root, name)
+                  with open(path, encoding="utf-8") as handle:
+                      text = handle.read()
+                  for target in pattern.findall(text):
+                      if target.startswith(("http://", "https://", "mailto:")):
+                          continue
+                      resolved = os.path.normpath(os.path.join(root, target))
+                      if not os.path.exists(resolved):
+                          broken.append(f"{path} -> {target}")
+          if broken:
+              print("Broken internal links:")
+              for item in broken:
+                  print("  " + item)
+              sys.exit(1)
+          print("all internal links resolve")
+          PY

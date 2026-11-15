@@ -1,0 +1,29 @@
+# Normalise line endings for text files on checkout.
+* text=auto eol=lf
+
+# Device configurations and documentation — LF, UTF-8
+*.cfg   text eol=lf
+*.md    text eol=lf
+*.txt   text eol=lf
+*.py    text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.json  text eol=lf
+*.html  text eol=lf
+*.mermaid text eol=lf
+
+# Binary — must never be line-ending converted
+*.pkt   binary
+*.pka   binary
+*.pdf   binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.zip   binary
+*.pcap  binary
+
+# Keep the original lab file byte-identical.
+lab/main_project-original.pkt binary
+lab/main_project.pkt binary

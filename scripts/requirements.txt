@@ -1,0 +1,11 @@
+# Runtime dependencies for the lab automation scripts.
+#
+#   pip install -r scripts/requirements.txt
+#
+# pkt-core decrypts the proprietary Cisco Packet Tracer .pkt container so the
+# lab can be diffed, audited and exported as plain text.
+
+pkt-core>=0.4,<1.0
+
+# Test runner for scripts/tests
+pytest>=8.0
