@@ -15,6 +15,10 @@
 
 ---
 
+<p align="center">
+<img src="docs/images/topology.png" alt="Centralized Enterprise Server Services - network topology" width="100%">
+</p>
+
 ## Table of Contents
 
 - [Overview](#overview)

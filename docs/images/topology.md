@@ -1,5 +1,15 @@
 # Topology Diagrams
 
+## Rendered diagram
+
+<p align="center">
+<img src="topology.png" alt="Network topology" width="100%">
+</p>
+
+The source of that image is [`topology-poster.html`](topology-poster.html), rendered with headless Chrome. The Mermaid version of the same diagram is [`topology.mmd`](topology.mmd).
+
+---
+
 ## Interactive diagram
 
 Rendered automatically by GitHub from [`topology.mmd`](topology.mmd):
