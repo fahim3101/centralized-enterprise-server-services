@@ -83,6 +83,29 @@ jobs:
           print("configs/ matches the lab")
           PY
 
+      - name: Check that the hardened lab only differs in the intended ways
+        run: |
+          python scripts/diff_lab.py \
+            lab/main_project-original.pkt \
+            lab/main_project.pkt \
+            --json lab-diff.json
+          python - <<'PY'
+          import json
+
+          with open("lab-diff.json", encoding="utf-8") as handle:
+              report = json.load(handle)
+
+          summary = report["summary"]
+          for key in ("DEVICES", "LINKS", "SHAPETESTS"):
+              before, after = summary[key]
+              assert before == after, f"{key} changed: {before} -> {after}"
+          for key in ("VERSION", "SCENARIOSET", "OPTIONS", "PHYSICALWORKSPACE",
+                      "FILTERS", "CLUSTERS"):
+              assert summary[key] == "unchanged", f"{key} changed"
+
+          print("structural invariants hold")
+          PY
+
       - name: Upload the audit report
         if: always()
         uses: actions/upload-artifact@v7

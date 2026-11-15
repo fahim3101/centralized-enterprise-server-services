@@ -253,6 +253,35 @@ def test_web_server_serves_the_company_portal(root):
     assert found, "Server0 has no index.html"
 
 
+def test_web_page_is_not_double_escaped(root):
+    """The stored page must be the raw HTML, escaped exactly once by the XML.
+
+    If the page were escaped before it was assigned to the XML text node, the
+    browser would render the markup source instead of the portal.
+    """
+    page_file = os.path.join(REPO, "assets", "web", "index.html")
+    with open(page_file, encoding="utf-8") as handle:
+        expected = handle.read()
+
+    for device in root.find("NETWORK").find("DEVICES").findall("DEVICE"):
+        engine = device.find("ENGINE")
+        type_node = engine.find("TYPE")
+        if type_node is None or type_node.text != "Server":
+            continue
+        if engine.find("NAME").text != "Server0":
+            continue
+        for filesystem in engine.iter("FILE"):
+            if filesystem.find("NAME").text != "http:":
+                continue
+            for entry in filesystem.find("FILES").findall("FILE"):
+                if entry.find("NAME").text != "index.html":
+                    continue
+                text = entry.find("FILE_CONTENT/TEXT").text or ""
+                assert text == expected, "the stored page is not the raw HTML"
+                assert "&lt;!DOCTYPE" not in text, "the page is double escaped"
+                assert "<!DOCTYPE html>" in text
+
+
 def test_mail_server_has_the_company_domain(services):
     mail = [s for s in services.values() if s["email"].get("SMTP_DOMAIN")]
     assert len(mail) == 1

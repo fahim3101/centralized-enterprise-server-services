@@ -180,12 +180,15 @@ INTRANET_HTML_FILE = os.path.join(
 
 
 def intranet_html() -> str:
-    """Return the corporate intranet page, with the XML markup escaped."""
+    """Return the corporate intranet page as it is stored in the lab.
+
+    The page is assigned to an XML text node, so the XML serialiser escapes
+    the markup exactly once on write.  The text must therefore be stored
+    *unescaped* here - escaping it as well would double-encode the markup and
+    the browser would render the HTML source instead of the page.
+    """
     with open(INTRANET_HTML_FILE, encoding="utf-8") as handle:
-        page = handle.read()
-    # Packet Tracer stores the page body as XML text, so the markup has to be
-    # escaped.  The resulting text is what the web browser renders.
-    return page.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        return handle.read()
 
 
 # --------------------------------------------------------------------------- #
