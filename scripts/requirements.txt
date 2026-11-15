@@ -4,8 +4,12 @@
 #
 # pkt-core decrypts the proprietary Cisco Packet Tracer .pkt container so the
 # lab can be diffed, audited and exported as plain text.
+#
+# Note: the distribution version on PyPI is 0.2.2 while the package's own
+# __version__ string reports 0.4.1.  The pin below follows the distribution
+# version, which is what pip resolves against.
 
-pkt-core>=0.4,<1.0
+pkt-core>=0.2.2,<1.0
 
 # Test runner for scripts/tests
 pytest>=8.0
