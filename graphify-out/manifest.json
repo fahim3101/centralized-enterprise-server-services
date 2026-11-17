@@ -1,0 +1,242 @@
+{
+  ".github/workflows/ci.yml": {
+    "mtime": 1794768212.1196117,
+    "seen": 1794943237.6320202,
+    "ast_hash": "222c9acf9d87daa6b3dfb8a863c75abe",
+    "semantic_hash": "222c9acf9d87daa6b3dfb8a863c75abe"
+  },
+  "pyproject.toml": {
+    "mtime": 1794767676.3136861,
+    "seen": 1794943237.632027,
+    "ast_hash": "aaed5ce4e84c8d687e78c939006a60a2",
+    "semantic_hash": "aaed5ce4e84c8d687e78c939006a60a2"
+  },
+  "scripts/apply_fixes.py": {
+    "mtime": 1794768180.495091,
+    "seen": 1794943237.6320293,
+    "ast_hash": "fa9d49ff0b80f09dbb757065613d63c0",
+    "semantic_hash": "fa9d49ff0b80f09dbb757065613d63c0"
+  },
+  "scripts/audit_lab.py": {
+    "mtime": 1794767821.5186036,
+    "seen": 1794943237.6320307,
+    "ast_hash": "00c6e5f182c2d18ad16a93797b05f57e",
+    "semantic_hash": "00c6e5f182c2d18ad16a93797b05f57e"
+  },
+  "scripts/check_ipam.py": {
+    "mtime": 1794767762.71694,
+    "seen": 1794943237.6320317,
+    "ast_hash": "a2865f0f6f1222f14a759b73841efc31",
+    "semantic_hash": "a2865f0f6f1222f14a759b73841efc31"
+  },
+  "scripts/diff_lab.py": {
+    "mtime": 1794768231.85477,
+    "seen": 1794943237.6320329,
+    "ast_hash": "20206b07f8b896b49683b2221bac41b3",
+    "semantic_hash": "20206b07f8b896b49683b2221bac41b3"
+  },
+  "scripts/pkt_export.py": {
+    "mtime": 1794767762.7174408,
+    "seen": 1794943237.6320338,
+    "ast_hash": "2cc1d5aa898e20e35db91bcb2e708544",
+    "semantic_hash": "2cc1d5aa898e20e35db91bcb2e708544"
+  },
+  "scripts/tests/test_lab.py": {
+    "mtime": 1794768185.4956865,
+    "seen": 1794943237.6320348,
+    "ast_hash": "e9d2869e8d196a002ca40b35957ed97d",
+    "semantic_hash": "e9d2869e8d196a002ca40b35957ed97d"
+  },
+  ".github/ISSUE_TEMPLATE/bug_report.md": {
+    "mtime": 1794767543.5939367,
+    "seen": 1794943237.6320353,
+    "ast_hash": "b411f02e37f077f53eecdc4d5e505906",
+    "semantic_hash": "b411f02e37f077f53eecdc4d5e505906"
+  },
+  ".github/ISSUE_TEMPLATE/feature_request.md": {
+    "mtime": 1794767490.6295953,
+    "seen": 1794943237.6320364,
+    "ast_hash": "edd0f7d7f29cf67f65c685575c8a79be",
+    "semantic_hash": "edd0f7d7f29cf67f65c685575c8a79be"
+  },
+  ".github/ISSUE_TEMPLATE/lab_issue.md": {
+    "mtime": 1794767543.594941,
+    "seen": 1794943237.6320374,
+    "ast_hash": "cae6ed0b267e9eba4c209c0d195d32ab",
+    "semantic_hash": "cae6ed0b267e9eba4c209c0d195d32ab"
+  },
+  ".github/PULL_REQUEST_TEMPLATE.md": {
+    "mtime": 1794767868.814006,
+    "seen": 1794943237.6320384,
+    "ast_hash": "448f195a50041be74918da99f712c66c",
+    "semantic_hash": "448f195a50041be74918da99f712c66c"
+  },
+  "CHANGELOG.md": {
+    "mtime": 1794767479.8212311,
+    "seen": 1794943237.6320393,
+    "ast_hash": "c0517ec4b3c2c60d63be75bc43f94ba6",
+    "semantic_hash": "c0517ec4b3c2c60d63be75bc43f94ba6"
+  },
+  "CODE_OF_CONDUCT.md": {
+    "mtime": 1794767466.1746252,
+    "seen": 1794943237.6320403,
+    "ast_hash": "1522614330be1fe10d54b0e4033fe2d1",
+    "semantic_hash": "1522614330be1fe10d54b0e4033fe2d1"
+  },
+  "CONTRIBUTING.md": {
+    "mtime": 1794767856.7113166,
+    "seen": 1794943237.632042,
+    "ast_hash": "780309ba774e4d5979a59da6d2609857",
+    "semantic_hash": "780309ba774e4d5979a59da6d2609857"
+  },
+  "README.bn.md": {
+    "mtime": 1794768024.8712509,
+    "seen": 1794943237.6320431,
+    "ast_hash": "a098d4bdb8ded6c3160faaeae302898a",
+    "semantic_hash": "a098d4bdb8ded6c3160faaeae302898a"
+  },
+  "README.md": {
+    "mtime": 1794769291.52929,
+    "seen": 1794943237.6320438,
+    "ast_hash": "e20e1b6f52555d231ea81025a0f3a099",
+    "semantic_hash": "e20e1b6f52555d231ea81025a0f3a099"
+  },
+  "SECURITY.md": {
+    "mtime": 1794767471.8252814,
+    "seen": 1794943237.6320448,
+    "ast_hash": "91d65d09e7818f11cf1efba114f8e16b",
+    "semantic_hash": "91d65d09e7818f11cf1efba114f8e16b"
+  },
+  "assets/web/index.html": {
+    "mtime": 1794767323.4799979,
+    "seen": 1794943237.6320457,
+    "ast_hash": "114b0225b1977422a2e6efeba3254d4d",
+    "semantic_hash": "114b0225b1977422a2e6efeba3254d4d"
+  },
+  "configs/README.md": {
+    "mtime": 1794767500.5787618,
+    "seen": 1794943237.6320467,
+    "ast_hash": "a8dcfd97b1c9dff1d95a5ad6e7603403",
+    "semantic_hash": "a8dcfd97b1c9dff1d95a5ad6e7603403"
+  },
+  "configs/hardened/README.md": {
+    "mtime": 1794767513.8316567,
+    "seen": 1794943237.6320474,
+    "ast_hash": "db95dbdf94b5de99206ba193f1fff5a0",
+    "semantic_hash": "db95dbdf94b5de99206ba193f1fff5a0"
+  },
+  "configs/servers/README.md": {
+    "mtime": 1794767543.596459,
+    "seen": 1794943237.6320481,
+    "ast_hash": "1ced0ff80324fccf76b5140828cd9959",
+    "semantic_hash": "1ced0ff80324fccf76b5140828cd9959"
+  },
+  "docs/ARCHITECTURE.md": {
+    "mtime": 1794767186.2560985,
+    "seen": 1794943237.6320493,
+    "ast_hash": "5029f944ec30a1b6309275bd8fce4e8f",
+    "semantic_hash": "5029f944ec30a1b6309275bd8fce4e8f"
+  },
+  "docs/AUDIT-FINDINGS.md": {
+    "mtime": 1794767856.7113166,
+    "seen": 1794943237.6320508,
+    "ast_hash": "b95a6d7062eab2bdd65c47625ab16a97",
+    "semantic_hash": "b95a6d7062eab2bdd65c47625ab16a97"
+  },
+  "docs/CONFIGURATION.md": {
+    "mtime": 1794767216.0771005,
+    "seen": 1794943237.6320517,
+    "ast_hash": "35b7277c1de05a16ff711f5452b1b3e5",
+    "semantic_hash": "35b7277c1de05a16ff711f5452b1b3e5"
+  },
+  "docs/DEVICE-INVENTORY.md": {
+    "mtime": 1794767198.753791,
+    "seen": 1794943237.6320527,
+    "ast_hash": "ffeb9ea1cd375f1b0fc3e6f5e4c61159",
+    "semantic_hash": "ffeb9ea1cd375f1b0fc3e6f5e4c61159"
+  },
+  "docs/IPAM.md": {
+    "mtime": 1794767155.5498326,
+    "seen": 1794943237.6320536,
+    "ast_hash": "3e7ca341e2dc4b175e264cae151d4d32",
+    "semantic_hash": "3e7ca341e2dc4b175e264cae151d4d32"
+  },
+  "docs/NAT-PAT-ISP.md": {
+    "mtime": 1794767276.693827,
+    "seen": 1794943237.6320543,
+    "ast_hash": "182e9bbeffdd4a9be7c1eced6b514a59",
+    "semantic_hash": "182e9bbeffdd4a9be7c1eced6b514a59"
+  },
+  "docs/SECURITY.md": {
+    "mtime": 1794767856.7123196,
+    "seen": 1794943237.632055,
+    "ast_hash": "5c1df12a1ddebeeca7926f2da11439c7",
+    "semantic_hash": "5c1df12a1ddebeeca7926f2da11439c7"
+  },
+  "docs/TESTING.md": {
+    "mtime": 1794767868.814508,
+    "seen": 1794943237.632056,
+    "ast_hash": "23c068a4b993bc6ccc9a515c3cbdb7aa",
+    "semantic_hash": "23c068a4b993bc6ccc9a515c3cbdb7aa"
+  },
+  "docs/TROUBLESHOOTING.md": {
+    "mtime": 1794767241.4902825,
+    "seen": 1794943237.6320567,
+    "ast_hash": "2a1ad340c063b13d1a94e863d40092a1",
+    "semantic_hash": "2a1ad340c063b13d1a94e863d40092a1"
+  },
+  "docs/VIVA_QA.md": {
+    "mtime": 1794767264.0243473,
+    "seen": 1794943237.632058,
+    "ast_hash": "5bd6e47a3b4dc302c44eedf48b438074",
+    "semantic_hash": "5bd6e47a3b4dc302c44eedf48b438074"
+  },
+  "docs/images/topology-poster.html": {
+    "mtime": 1794769266.232726,
+    "seen": 1794943237.6320586,
+    "ast_hash": "50d85a1b21fced83a034ff75b14e42f4",
+    "semantic_hash": "50d85a1b21fced83a034ff75b14e42f4"
+  },
+  "docs/images/topology.md": {
+    "mtime": 1794769291.5297935,
+    "seen": 1794943237.6320593,
+    "ast_hash": "1fb6e931cc4e0d9c809e375c808709aa",
+    "semantic_hash": "1fb6e931cc4e0d9c809e375c808709aa"
+  },
+  "docs/reference/README.md": {
+    "mtime": 1794767526.1149185,
+    "seen": 1794943237.63206,
+    "ast_hash": "2d9bc9f8799a836b0b202807a58d8c27",
+    "semantic_hash": "2d9bc9f8799a836b0b202807a58d8c27"
+  },
+  "docs/reference/server-services-notes.md": {
+    "mtime": 1794675799.78597,
+    "seen": 1794943237.632061,
+    "ast_hash": "f72a5f93ada9913290c9458003a830cd",
+    "semantic_hash": "f72a5f93ada9913290c9458003a830cd"
+  },
+  "lab/README.md": {
+    "mtime": 1794767868.814508,
+    "seen": 1794943237.632062,
+    "ast_hash": "55e667e29959da2994456658c6d9f469",
+    "semantic_hash": "55e667e29959da2994456658c6d9f469"
+  },
+  "scripts/requirements.txt": {
+    "mtime": 1794767931.899376,
+    "seen": 1794943237.632063,
+    "ast_hash": "026211b432329b792ad8fea4ede09adb",
+    "semantic_hash": "026211b432329b792ad8fea4ede09adb"
+  },
+  "docs/reference/isp-nat-pat-live-demo.pdf": {
+    "mtime": 1794675796.023348,
+    "seen": 1794943237.6320636,
+    "ast_hash": "1c921b6d79164b419a7ec7d47fbca5b5",
+    "semantic_hash": "1c921b6d79164b419a7ec7d47fbca5b5"
+  },
+  "docs/images/topology.png": {
+    "mtime": 1794769271.804122,
+    "seen": 1794943237.6320646,
+    "ast_hash": "f92991fe7336ac68a529b063471e4aac",
+    "semantic_hash": "f92991fe7336ac68a529b063471e4aac"
+  }
+}

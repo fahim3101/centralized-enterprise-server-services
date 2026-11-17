@@ -1,0 +1,3 @@
+# Internal graphify state and caches - not part of the published graph.
+.graphify_*
+cache/

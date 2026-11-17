@@ -416,6 +416,35 @@ Highest-impact items:
 
 ---
 
+## Knowledge Graph
+
+The whole repository has been indexed into a navigable knowledge graph with
+[`graphify`](https://pypi.org/project/graphifyy/):
+
+| Output | Purpose |
+|---|---|
+| [`graphify-out/graph.html`](graphify-out/graph.html) | Interactive graph — open in any browser, no server needed |
+| [`graphify-out/graph.json`](graphify-out/graph.json) | GraphRAG-ready export |
+| [`graphify-out/GRAPH_REPORT.md`](graphify-out/GRAPH_REPORT.md) | Plain-language report: god nodes, 41 communities, surprising connections |
+
+**433 nodes · 645 edges · 41 communities.** The most connected nodes are the
+audit defect record, the main README, the architecture document and the four
+core lab-tooling functions (`audit`, `apply_fixes`, `devices`, `server_services`).
+
+The graph found cross-document links that aren't obvious from the file tree —
+for example, the Bengali original PDF and the cleaned-up English NAT/PAT demo
+script describe the same demonstration, and the "split-brain DNS" defect in the
+audit record is conceptually linked to the "one authoritative DNS server"
+decision in the README.
+
+Rebuild it at any time with:
+
+```bash
+/graphify .
+```
+
+---
+
 ## Documentation Index
 
 | Document | Purpose |
